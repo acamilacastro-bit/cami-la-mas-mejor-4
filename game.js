@@ -283,6 +283,7 @@ function dibujar() {
   ctx.fillText("JUGADOR", jugador.x, jugador.y - 20);
 }
 
+
 function actualizar(tiempo = 0) {
   if (!jugando) return;
 
@@ -295,27 +296,34 @@ function actualizar(tiempo = 0) {
   let dx = 0;
   let dy = 0;
 
-  if (teclas.ArrowLeft || teclas.a) dx--;
-  if (teclas.ArrowRight || teclas.d) dx++;
-  if (teclas.ArrowUp || teclas.w) dy--;
-  if (teclas.ArrowDown || teclas.s) dy++;
+  if (teclas["ArrowLeft"] || teclas["a"] || teclas["A"]) dx -= 1;
+  if (teclas["ArrowRight"] || teclas["d"] || teclas["D"]) dx += 1;
+  if (teclas["ArrowUp"] || teclas["w"] || teclas["W"]) dy -= 1;
+  if (teclas["ArrowDown"] || teclas["s"] || teclas["S"]) dy += 1;
 
-  // Evita que el movimiento diagonal sea más rápido.
-  const longitud = Math.hypot(dx, dy);
-  if (longitud > 0) {
-    dx /= longitud;
-    dy /= longitud;
+  const distancia = Math.hypot(dx, dy);
+
+  if (distancia > 0) {
+    dx /= distancia;
+    dy /= distancia;
   }
 
   jugador.x = Math.max(
     15,
-    Math.min(785, jugador.x + dx * jugador.velocidad * delta)
+    Math.min(785, jugador.x + dx * 4 * delta)
   );
 
   jugador.y = Math.max(
     15,
-    Math.min(485, jugador.y + dy * jugador.velocidad * delta)
+    Math.min(485, jugador.y + dy * 4 * delta)
   );
+
+  recogerCristales();
+  dibujar();
+
+  requestAnimationFrame(actualizar);
+}
+
 
   recogerCristales();
   dibujar();
