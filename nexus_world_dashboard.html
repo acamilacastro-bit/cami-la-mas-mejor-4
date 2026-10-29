@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus World - Futuristic Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind Configuration for Custom Neon Colors & Animations -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            neon: {
+              blue: '#00f3ff',
+              purple: '#a855f7',
+              pink: '#ec4899',
+              green: '#10b981',
+              dark: '#030712'
+            }
+          },
+          boxShadow: {
+            'neon-blue': '0 0 15px rgba(0, 243, 255, 0.4)',
+            'neon-purple': '0 0 15px rgba(168, 85, 247, 0.4)',
+            'neon-pink': '0 0 15px rgba(236, 72, 153, 0.4)',
+            'glow-lg': '0 0 25px rgba(0, 243, 255, 0.25)'
+          },
+          animation: {
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'radar': 'radar 4s linear infinite',
+          },
+          keyframes: {
+            radar: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Sci-Fi Scrollbars & Clip Paths */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+      border: 1px solid #00f3ff44;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f3ff;
+    }
+    .clip-corner {
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+    .grid-bg {
+      background-image: linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    .scanline {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 243, 255, 0.03) 50%,
+        rgba(0, 243, 255, 0.03)
+      );
+      background-size: 100% 4px;
+    }
+  </style>
+</head>
+<body class="h-full grid-bg font-sans overflow-x-hidden antialiased select-none">
+  <div class="fixed inset-0 scanline pointer-events-none z-50 opacity-60"></div>
+
+  <!-- AUTH MODAL OVERLAY (Login/Register) -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900/90 border border-neon-blue/40 rounded-xl p-6 clip-corner shadow-neon-blue relative">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <i data-lucide="shield-check" class="w-8 h-8 text-neon-blue animate-pulse"></i>
+          <div>
+            <h2 class="text-xl font-black tracking-wider text-white uppercase">Nexus World</h2>
+            <p class="text-xs text-slate-400">Verificación de Identidad Requerida</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-800 mb-6">
+        <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 font-semibold text-sm border-b-2 border-neon-blue text-neon-blue">Iniciar Sesión</button>
+        <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200">Registrarse</button>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div id="registerFields" class="hidden space-y-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Nombre de Operativo</label>
+            <div class="relative">
+              <i data-lucide="user" class="absolute left-3 top-3 w-4 h-4 text-slate-500"></i>
+              <input type="text" id="regUsername" placeholder="CyberGhost_X" class="w-full bg-slate-950 border border-slate-700 rounded pl-10 pr-3 py-2 text-sm text-white focus:border-neon-blue focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Correo Encriptado</label>
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="email" id="authEmail" value="pilot@nexus.net" required class="w-full bg-slate-950 border border-slate-700 rounded pl-10 pr-3 py-2 text-sm text-white focus:border-neon-blue focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Clave Biométrica</label>
+          <div class="relative">
+            <i data-lucide="lock" class="absolute left-3 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="password" id="authPassword" value="••••••••••••" required class="w-full bg-slate-950 border border-slate-700 rounded pl-10 pr-3 py-2 text-sm text-white focus:border-neon-blue focus:outline-none">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full mt-4 py-3 bg-neon-blue/20 border border-neon-blue text-neon-blue font-bold tracking-wider uppercase rounded hover:bg-neon-blue hover:text-slate-950 transition-all duration-300 shadow-neon-blue flex items-center justify-center gap-2">
+          <i data-lucide="power" class="w-4 h-4"></i>
+          <span id="authSubmitText">Acceder al Sistema</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP LAUNCHER LAYOUT -->
+  <div class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded bg-neon-blue/20 border border-neon-blue flex items-center justify-center shadow-neon-blue">
+            <i data-lucide="cpu" class="w-5 h-5 text-neon-blue"></i>
+          </div>
+          <div>
+            <h1 class="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">NEXUS WORLD</h1>
+            <p class="text-[10px] text-slate-400 -mt-1 tracking-widest uppercase">v2.0.46 // Sector Neón</p>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="hidden md:flex items-center gap-1 ml-6 bg-slate-950/60 p-1 rounded-lg border border-slate-800">
+          <button onclick="setActiveTab('overview')" id="nav-overview" class="px-3 py-1.5 rounded text-xs font-bold transition-all text-neon-blue bg-slate-800 border border-neon-blue/40">Visión General</button>
+          <button onclick="setActiveTab('character')" id="nav-character" class="px-3 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition-all">Personaje</button>
+          <button onclick="setActiveTab('map')" id="nav-map" class="px-3 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition-all">Mapa y Misiones</button>
+          <button onclick="setActiveTab('inventory')" id="nav-inventory" class="px-3 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition-all">Inventario</button>
+          <button onclick="setActiveTab('multiplayer')" id="nav-multiplayer" class="px-3 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition-all">Multijugador</button>
+        </nav>
+      </div>
+
+      <!-- Right Actions: User Profile & Nexus AI Launcher -->
+      <div class="flex items-center gap-3">
+        <!-- AI Assistant Quick Launch -->
+        <button onclick="toggleAiModal()" class="px-3 py-1.5 bg-neon-purple/20 border border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white rounded text-xs font-bold flex items-center gap-2 transition-all shadow-neon-purple">
+          <i data-lucide="bot" class="w-4 h-4"></i>
+          <span>Nexus AI</span>
+        </button>
+
+        <!-- Player Quick Status -->
+        <div class="flex items-center gap-3 pl-3 border-l border-slate-800">
+          <div class="text-right hidden sm:block">
+            <div id="headerPlayerName" class="text-xs font-bold text-white">V-Runner</div>
+            <div class="text-[10px] text-neon-blue">Nvl <span id="headerPlayerLevel">12</span> // Hacker Neón</div>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-slate-800 border-2 border-neon-blue overflow-hidden relative cursor-pointer" onclick="setActiveTab('character')">
+            <img id="headerAvatar" src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-full h-full object-cover">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Sub-Nav -->
+    <div class="md:hidden bg-slate-950 border-b border-slate-800 px-2 py-2 flex overflow-x-auto gap-2">
+      <button onclick="setActiveTab('overview')" class="px-3 py-1 rounded text-xs font-bold whitespace-nowrap bg-slate-800 text-neon-blue">General</button>
+      <button onclick="setActiveTab('character')" class="px-3 py-1 rounded text-xs font-bold whitespace-nowrap text-slate-400">Personaje</button>
+      <button onclick="setActiveTab('map')" class="px-3 py-1 rounded text-xs font-bold whitespace-nowrap text-slate-400">Mapa</button>
+      <button onclick="setActiveTab('inventory')" class="px-3 py-1 rounded text-xs font-bold whitespace-nowrap text-slate-400">Inventario</button>
+      <button onclick="setActiveTab('multiplayer')" class="px-3 py-1 rounded text-xs font-bold whitespace-nowrap text-slate-400">Multijugador</button>
+    </div>
+
+    <!-- MAIN CONTENT VIEW AREA -->
+    <main class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- TAB 1: OVERVIEW DASHBOARD -->
+      <section id="tab-overview" class="space-y-6">
+        <!-- Hero Launch Banner -->
+        <div class="relative rounded-2xl overflow-hidden border border-neon-blue/30 bg-gradient-to-r from-slate-900 via-slate-900/90 to-purple-950/40 p-6 md:p-8 clip-corner shadow-glow-lg">
+          <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-neon-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="relative z-10 max-w-2xl space-y-4">
+            <span class="px-2.5 py-1 rounded bg-neon-blue/20 border border-neon-blue text-neon-blue text-[10px] font-bold tracking-widest uppercase">Servidor En Línea • 12,480 Jugadores</span>
+            <h2 class="text-3xl md:text-4xl font-black text-white tracking-wide">BIENVENIDO A NEXUS CITY</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Explora distritos cibernéticos, acepta encargos de corporaciones rivales y forja tu reputación como mercenario de élite. La IA Nexus está lista para asistirte en cada misión.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+              <button onclick="setActiveTab('map')" class="px-6 py-3 bg-neon-blue text-slate-950 font-black rounded uppercase tracking-wider hover:bg-white hover:shadow-neon-blue transition-all flex items-center gap-2">
+                <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                <span>Iniciar Simulación</span>
+              </button>
+              <button onclick="toggleAiModal()" class="px-6 py-3 bg-slate-900 border border-neon-purple text-neon-purple font-bold rounded uppercase tracking-wider hover:bg-neon-purple/20 transition-all flex items-center gap-2">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+                <span>Consultar Nexus AI</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Level Card -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+            <div class="p-3 bg-neon-blue/10 border border-neon-blue/40 rounded-lg text-neon-blue">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Nivel Operativo</div>
+              <div class="text-2xl font-black text-white" id="overviewLevel">12</div>
+              <div class="w-24 bg-slate-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                <div class="bg-neon-blue h-full w-[65%]"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credits -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+            <div class="p-3 bg-neon-purple/10 border border-neon-purple/40 rounded-lg text-neon-purple">
+              <i data-lucide="coins" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Créditos Nexus</div>
+              <div class="text-2xl font-black text-white" id="overviewCredits">45,820 ₡</div>
+              <div class="text-[10px] text-neon-green">+1,200 en última misión</div>
+            </div>
+          </div>
+
+          <!-- Active Quests -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+            <div class="p-3 bg-neon-pink/10 border border-neon-pink/40 rounded-lg text-neon-pink">
+              <i data-lucide="crosshair" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Misiones Activas</div>
+              <div class="text-2xl font-black text-white">3 Pendientes</div>
+              <div class="text-[10px] text-slate-400">1 Misión Principal</div>
+            </div>
+          </div>
+
+          <!-- Reputation -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+            <div class="p-3 bg-emerald-500/10 border border-emerald-500/40 rounded-lg text-emerald-400">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Reputación Corporativa</div>
+              <div class="text-2xl font-black text-white">78% (Alta)</div>
+              <div class="text-[10px] text-emerald-400">Facción: Arasaka Tech</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column Content: News & Daily Tasks -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- News Feed -->
+          <div class="lg:col-span-2 bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-4">
+            <h3 class="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-wider border-b border-slate-800 pb-3">
+              <i data-lucide="newspaper" class="w-4 h-4 text-neon-blue"></i>
+              Noticias del Archivo & Actualizaciones
+            </h3>
+            
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-lg hover:border-neon-blue/40 transition-all cursor-pointer">
+                <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                  <span class="text-neon-purple font-bold">EVENTO GLOBAL</span>
+                  <span>Hace 2 horas</span>
+                </div>
+                <h4 class="font-bold text-white text-sm">Incursión en el Distrito Neón Central</h4>
+                <p class="text-xs text-slate-400 mt-1">Los servidores centrales han detectado una brecha en el sector 7. Se buscan equipos de hackeo para recuperar núcleos de datos.</p>
+              </div>
+
+              <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-lg hover:border-neon-blue/40 transition-all cursor-pointer">
+                <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                  <span class="text-neon-blue font-bold">ACTUALIZACIÓN 2.1</span>
+                  <span>Ayer</span>
+                </div>
+                <h4 class="font-bold text-white text-sm">Nuevos Implantes Cyberware Disponibles</h4>
+                <p class="text-xs text-slate-400 mt-1">Visita a los Matasanos en el Distrito Bajo para acceder a los procesadores neuronales de última generación.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Squad Status -->
+          <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-4">
+            <h3 class="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-wider border-b border-slate-800 pb-3">
+              <i data-lucide="users" class="w-4 h-4 text-neon-purple"></i>
+              Escuadrón Activo
+            </h3>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2 bg-slate-950/50 rounded border border-slate-800">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-slate-800 border border-neon-blue flex items-center justify-center font-bold text-xs text-neon-blue">
+                    K1
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Kira_Net</div>
+                    <div class="text-[10px] text-slate-400">Netrunner • Nvl 15</div>
+                  </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-neon-blue"></span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 bg-slate-950/50 rounded border border-slate-800">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-slate-800 border border-neon-pink flex items-center justify-center font-bold text-xs text-neon-pink">
+                    ZX
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Zero_Blade</div>
+                    <div class="text-[10px] text-slate-400">Solo • Nvl 18</div>
+                  </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              </div>
+            </div>
+
+            <button onclick="setActiveTab('multiplayer')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded font-bold transition-all uppercase">
+              Buscar Más Aliados
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: CHARACTER CREATOR / STATS -->
+      <section id="tab-character" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Character Preview Frame -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 clip-corner flex flex-col items-center justify-center relative overflow-hidden min-h-[400px]">
+            <div class="absolute inset-0 bg-gradient-to-b from-neon-blue/10 via-transparent to-slate-950 pointer-events-none"></div>
+            
+            <div class="relative z-10 w-48 h-64 border-2 border-neon-blue/40 rounded-xl overflow-hidden shadow-neon-blue mb-4">
+              <img id="characterPreviewImg" src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80" alt="Character" class="w-full h-full object-cover">
+              <div class="absolute bottom-0 inset-x-0 bg-slate-950/80 p-2 text-center text-xs font-bold text-neon-blue border-t border-neon-blue/30">
+                <span id="charPreviewClass">Hacker Neón</span>
+              </div>
+            </div>
+
+            <h3 id="charPreviewName" class="text-xl font-black text-white tracking-wider">V-Runner</h3>
+            <p class="text-xs text-slate-400">Especialista en Infiltración Digital</p>
+
+            <!-- Quick Stat Badges -->
+            <div class="flex gap-2 mt-4">
+              <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded">EXP: 4,500/6,000</span>
+              <span class="px-2 py-1 bg-neon-purple/20 border border-neon-purple text-xs text-neon-purple rounded">HP: 100/100</span>
+            </div>
+          </div>
+
+          <!-- Customizer Form & Attributes -->
+          <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3 flex items-center justify-between">
+              <span>Personalización de Operativo</span>
+              <span class="text-xs text-neon-blue font-normal">Puntos Disponibles: <b id="statPoints">5</b></span>
+            </h3>
+
+            <!-- Name & Outfit Picker -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs uppercase text-slate-400 mb-1">Nombre de Agente</label>
+                <input type="text" id="inputCharName" value="V-Runner" onchange="updateCharInfo()" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-neon-blue focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block text-xs uppercase text-slate-400 mb-1">Clase de Combate</label>
+                <select id="selectCharClass" onchange="updateCharClass()" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-neon-blue focus:outline-none">
+                  <option value="Hacker Neón">Hacker Neón (Especialista Tech)</option>
+                  <option value="Solo Ciberpunk">Solo Ciberpunk (Combate Pesado)</option>
+                  <option value="Sombra Urbana">Sombra Urbana (Agilidad y Sigilo)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Avatar Image Selection -->
+            <div>
+              <label class="block text-xs uppercase text-slate-400 mb-2">Apariencia Visual</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button onclick="setAvatar('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80')" class="p-1 border-2 border-neon-blue rounded overflow-hidden h-20">
+                  <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                </button>
+                <button onclick="setAvatar('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80')" class="p-1 border-2 border-slate-800 hover:border-neon-purple rounded overflow-hidden h-20">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                </button>
+                <button onclick="setAvatar('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80')" class="p-1 border-2 border-slate-800 hover:border-neon-pink rounded overflow-hidden h-20">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats Allocation -->
+            <div class="space-y-4 pt-2">
+              <h4 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Atributos Principales</h4>
+              
+              <!-- Stat 1: Tech -->
+              <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded border border-slate-800">
+                <div>
+                  <div class="text-xs font-bold text-white uppercase">Tecnología (Hacking)</div>
+                  <div class="text-[10px] text-slate-400">Aumenta velocidad de ciberataques</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button onclick="adjustStat('tech', -1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">-</button>
+                  <span id="statTechVal" class="text-sm font-bold text-neon-blue w-6 text-center">8</span>
+                  <button onclick="adjustStat('tech', 1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">+</button>
+                </div>
+              </div>
+
+              <!-- Stat 2: Combat -->
+              <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded border border-slate-800">
+                <div>
+                  <div class="text-xs font-bold text-white uppercase">Combate & Balística</div>
+                  <div class="text-[10px] text-slate-400">Incrementa daño con armas de energía</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button onclick="adjustStat('combat', -1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">-</button>
+                  <span id="statCombatVal" class="text-sm font-bold text-neon-purple w-6 text-center">5</span>
+                  <button onclick="adjustStat('combat', 1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">+</button>
+                </div>
+              </div>
+
+              <!-- Stat 3: Agility -->
+              <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded border border-slate-800">
+                <div>
+                  <div class="text-xs font-bold text-white uppercase">Agilidad & Reflejos</div>
+                  <div class="text-[10px] text-slate-400">Mejora evasión y movimiento parkour</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button onclick="adjustStat('agility', -1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">-</button>
+                  <span id="statAgilityVal" class="text-sm font-bold text-neon-pink w-6 text-center">6</span>
+                  <button onclick="adjustStat('agility', 1)" class="w-7 h-7 bg-slate-800 rounded text-white font-bold hover:bg-slate-700">+</button>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="saveCharacter()" class="w-full py-3 bg-neon-blue/20 border border-neon-blue text-neon-blue font-bold uppercase rounded hover:bg-neon-blue hover:text-slate-950 transition-all shadow-neon-blue">
+              Guardar Cambios de Operativo
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: CITY MAP & QUEST LOG -->
+      <section id="tab-map" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Interactive Map Container -->
+          <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl p-4 clip-corner flex flex-col h-[500px] relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3 z-10">
+              <h3 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-neon-blue"></i>
+                Mapa Holográfico de Nexus City
+              </h3>
+              <span class="text-xs text-neon-blue font-mono">SECTOR: DISTRITO NEÓN 07</span>
+            </div>
+
+            <!-- Simulated Map Visual -->
+            <div class="relative flex-1 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden grid-bg flex items-center justify-center">
+              
+              <!-- Radar Scanner Animation Overlay -->
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-[400px] h-[400px] rounded-full border border-neon-blue/20 animate-pulse"></div>
+                <div class="w-[200px] h-[200px] rounded-full border border-neon-purple/20"></div>
+                <div class="absolute w-[400px] h-[400px] rounded-full border-t border-neon-blue/60 animate-radar"></div>
+              </div>
+
+              <!-- Interactive POI Markers on Map -->
+              <button onclick="selectQuestMarker(1)" class="absolute top-1/4 left-1/3 group p-2">
+                <span class="w-4 h-4 bg-neon-blue rounded-full block animate-ping absolute"></span>
+                <span class="w-4 h-4 bg-neon-blue rounded-full block relative shadow-neon-blue flex items-center justify-center text-[10px] font-bold text-slate-950">1</span>
+                <span class="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-neon-blue text-[10px] px-2 py-0.5 rounded text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                  Torre Arasaka (Hackeo)
+                </span>
+              </button>
+
+              <button onclick="selectQuestMarker(2)" class="absolute bottom-1/3 right-1/4 group p-2">
+                <span class="w-4 h-4 bg-neon-purple rounded-full block relative shadow-neon-purple flex items-center justify-center text-[10px] font-bold text-white">2</span>
+                <span class="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-neon-purple text-[10px] px-2 py-0.5 rounded text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                  Mercado Bajo (Contrabando)
+                </span>
+              </button>
+
+              <button onclick="selectQuestMarker(3)" class="absolute top-1/2 right-1/3 group p-2">
+                <span class="w-4 h-4 bg-neon-pink rounded-full block relative shadow-neon-pink flex items-center justify-center text-[10px] font-bold text-white">3</span>
+                <span class="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-neon-pink text-[10px] px-2 py-0.5 rounded text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                  Club Ciber-Odisea
+                </span>
+              </button>
+
+              <div class="absolute bottom-3 left-3 bg-slate-900/90 border border-slate-800 p-2 rounded text-[10px] text-slate-400 space-y-1 z-10">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-neon-blue"></span> Misión Principal</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-neon-purple"></span> Misión Secundaria</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-neon-pink"></span> Punto de Interés</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quest Log Side Panel -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-slate-800 pb-3 mb-4 flex items-center gap-2">
+                <i data-lucide="list-todo" class="w-4 h-4 text-neon-purple"></i>
+                Diario de Encargos
+              </h3>
+
+              <div id="questList" class="space-y-3">
+                <!-- Dynamic Quests Injected Here -->
+              </div>
+            </div>
+
+            <!-- Ask AI for Quest Help Button -->
+            <button onclick="askAiAboutCurrentQuest()" class="w-full mt-4 py-2.5 bg-neon-purple/20 border border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white rounded text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 shadow-neon-purple">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+              <span>Consultar Nexus AI sobre Misión</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: INVENTORY & EQUIPMENT -->
+      <section id="tab-inventory" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Equipment Slots -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
+            <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-slate-800 pb-3">Equipamiento Activo</h3>
+            
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-950/80 border border-neon-blue/40 rounded-lg flex items-center gap-3">
+                <div class="w-12 h-12 bg-slate-900 border border-neon-blue/60 rounded flex items-center justify-center text-neon-blue">
+                  <i data-lucide="crosshair" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">Rifle de Plasma 'Viper V4'</div>
+                  <div class="text-[10px] text-neon-blue">Arma Principal • Daño: 145</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-950/80 border border-neon-purple/40 rounded-lg flex items-center gap-3">
+                <div class="w-12 h-12 bg-slate-900 border border-neon-purple/60 rounded flex items-center justify-center text-neon-purple">
+                  <i data-lucide="shield" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">Traje Neón Táctico</div>
+                  <div class="text-[10px] text-neon-purple">Blindaje • Escudo +80</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center gap-3">
+                <div class="w-12 h-12 bg-slate-900 border border-slate-700 rounded flex items-center justify-center text-slate-500">
+                  <i data-lucide="cpu" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">Procesador Neuronal V2</div>
+                  <div class="text-[10px] text-slate-400">Cyberware • Velocidad Hack +15%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Grid -->
+          <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 class="font-bold text-white text-sm uppercase tracking-wider">Mochila de Almacenamiento (12/20)</h3>
+              <span class="text-xs text-slate-400">Créditos: <b class="text-neon-purple">45,820 ₡</b></span>
+            </div>
+
+            <!-- Grid Items -->
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              <!-- Item 1 -->
+              <div class="aspect-square bg-slate-950 border border-neon-blue/40 rounded p-2 flex flex-col items-center justify-center relative group cursor-pointer hover:border-neon-blue">
+                <i data-lucide="zap" class="w-6 h-6 text-neon-blue"></i>
+                <span class="text-[10px] text-slate-300 mt-1 truncate max-w-full">Batería Ion</span>
+                <span class="absolute top-1 right-1 text-[9px] bg-slate-800 px-1 rounded text-slate-400">x4</span>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="aspect-square bg-slate-950 border border-neon-purple/40 rounded p-2 flex flex-col items-center justify-center relative group cursor-pointer hover:border-neon-purple">
+                <i data-lucide="disc" class="w-6 h-6 text-neon-purple"></i>
+                <span class="text-[10px] text-slate-300 mt-1 truncate max-w-full">Holodisco</span>
+                <span class="absolute top-1 right-1 text-[9px] bg-slate-800 px-1 rounded text-slate-400">x1</span>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="aspect-square bg-slate-950 border border-emerald-500/40 rounded p-2 flex flex-col items-center justify-center relative group cursor-pointer hover:border-emerald-400">
+                <i data-lucide="heart-pulse" class="w-6 h-6 text-emerald-400"></i>
+                <span class="text-[10px] text-slate-300 mt-1 truncate max-w-full">Nanobots HP</span>
+                <span class="absolute top-1 right-1 text-[9px] bg-slate-800 px-1 rounded text-slate-400">x8</span>
+              </div>
+
+              <!-- Empty Slots -->
+              <div class="aspect-square bg-slate-950/40 border border-slate-800/60 rounded flex items-center justify-center text-slate-800">
+                <span class="text-xs font-mono">+</span>
+              </div>
+              <div class="aspect-square bg-slate-950/40 border border-slate-800/60 rounded flex items-center justify-center text-slate-800">
+                <span class="text-xs font-mono">+</span>
+              </div>
+              <div class="aspect-square bg-slate-950/40 border border-slate-800/60 rounded flex items-center justify-center text-slate-800">
+                <span class="text-xs font-mono">+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: MULTIPLAYER LOBBY -->
+      <section id="tab-multiplayer" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Servers List -->
+          <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
+            <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center justify-between">
+              <span>Salas de Mundo Abierto Disponibles</span>
+              <span class="text-xs text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Ping: 24ms</span>
+            </h3>
+
+            <div class="space-y-3">
+              <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center justify-between hover:border-neon-blue/50 transition-all">
+                <div>
+                  <div class="font-bold text-white text-sm">Servidor Neón Alpha #1</div>
+                  <div class="text-xs text-slate-400">Modo: Cooperativo / PVP Abierto • Región: Latam Norte</div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <span class="text-xs font-mono text-neon-blue">48 / 64 Jugadores</span>
+                  <button class="px-4 py-1.5 bg-neon-blue text-slate-950 text-xs font-bold rounded hover:bg-white uppercase">Unirse</button>
+                </div>
+              </div>
+
+              <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center justify-between hover:border-neon-blue/50 transition-all">
+                <div>
+                  <div class="font-bold text-white text-sm">Sector Corporativo Arasaka #4</div>
+                  <div class="text-xs text-slate-400">Modo: Solo Incursiones PVE • Región: Latam Sur</div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <span class="text-xs font-mono text-neon-blue">62 / 64 Jugadores</span>
+                  <button class="px-4 py-1.5 bg-neon-blue text-slate-950 text-xs font-bold rounded hover:bg-white uppercase">Unirse</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Friends Chat -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-slate-800 pb-3 mb-4">
+                Comunicaciones de Red
+              </h3>
+              <p class="text-xs text-slate-400">Busca compañeros para completar la misión de la Torre Arasaka o consulta consejos al asistente virtual Nexus AI.</p>
+            </div>
+
+            <button onclick="toggleAiModal()" class="w-full mt-6 py-3 bg-neon-purple/20 border border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white rounded text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 shadow-neon-purple">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+              <span>Abrir Nexus AI Táctico</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- NEXUS AI ASSISTANT MODAL (INTEGRATED GEMINI API CHAT) -->
+  <div id="aiModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="w-full max-w-2xl bg-slate-900 border border-neon-purple rounded-xl clip-corner shadow-neon-purple flex flex-col h-[600px] overflow-hidden">
+      
+      <!-- AI Header -->
+      <div class="bg-slate-950 p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-neon-purple/20 border border-neon-purple flex items-center justify-center text-neon-purple shadow-neon-purple">
+            <i data-lucide="bot" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm">NEXUS AI - Asistente Táctico del Juego</h3>
+            <p class="text-[10px] text-neon-purple">Model: gemini-3-flash-preview • Conexión Directa</p>
+          </div>
+        </div>
+        <button onclick="toggleAiModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Messages Stream Area -->
+      <div id="aiMessages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-950/50">
+        <!-- System Welcome Message -->
+        <div class="flex gap-3">
+          <div class="w-7 h-7 rounded bg-neon-purple/20 border border-neon-purple shrink-0 flex items-center justify-center text-neon-purple text-xs font-bold">
+            AI
+          </div>
+          <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg text-xs text-slate-200 max-w-[85%] leading-relaxed">
+            Saludos, Operativo <b class="text-neon-blue" id="aiWelcomePlayer">V-Runner</b>. Soy el asistente holográfico de Nexus World. ¿En qué puedo ayudarte hoy? Puedo guiarte en misiones, sugerirte combinaciones de habilidades o contarte más sobre el lore de la ciudad.
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggested Prompts Pill -->
+      <div class="px-4 py-2 bg-slate-950 border-t border-slate-800 flex gap-2 overflow-x-auto text-[11px]">
+        <button onclick="sendQuickAiQuery('¿Cómo completo la misión de hackeo en Arasaka?')" class="px-2.5 py-1 bg-slate-900 border border-slate-800 hover:border-neon-purple text-slate-300 rounded whitespace-nowrap">
+          💡 Ayuda Misión Arasaka
+        </button>
+        <button onclick="sendQuickAiQuery('¿Qué habilidades debo subir para mi build de Hacker Neón?')" class="px-2.5 py-1 bg-slate-900 border border-slate-800 hover:border-neon-purple text-slate-300 rounded whitespace-nowrap">
+          ⚡ Build Hacker Neón
+        </button>
+        <button onclick="sendQuickAiQuery('¿Cuál es la historia del Distrito Neón 07?')" class="px-2.5 py-1 bg-slate-900 border border-slate-800 hover:border-neon-purple text-slate-300 rounded whitespace-nowrap">
+          📖 Lore Ciudad
+        </button>
+      </div>
+
+      <!-- AI Input Area -->
+      <form onsubmit="handleAiMessageSubmit(event)" class="p-3 bg-slate-950 border-t border-slate-800 flex gap-2">
+        <input type="text" id="aiInput" placeholder="Pregunta a Nexus AI..." required class="flex-1 bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:border-neon-purple focus:outline-none">
+        <button type="submit" id="aiSendBtn" class="px-4 py-2 bg-neon-purple text-white rounded font-bold text-xs uppercase hover:bg-purple-600 transition-all flex items-center gap-1">
+          <span>Enviar</span>
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC & STATE MANAGEMENT -->
+  <script>
+    // --- APP STATE ---
+    let gameState = {
+      player: {
+        name: 'V-Runner',
+        class: 'Hacker Neón',
+        level: 12,
+        credits: 45820,
+        avatar: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80',
+        stats: {
+          tech: 8,
+          combat: 5,
+          agility: 6,
+          points: 5
+        }
+      },
+      selectedQuestId: 1,
+      quests: [
+        {
+          id: 1,
+          title: "Brecha en Torre Arasaka",
+          type: "Principal",
+          levelReq: 10,
+          reward: "15,000 ₡ + Exp 2,500",
+          desc: "Infíltrate en el servidor del piso 42 y descarga el archivo 'Código Fantasma' antes de que los programas de defensa rastreen tu IP cibernética.",
+          status: "En Progreso"
+        },
+        {
+          id: 2,
+          title: "Contrabando en Mercado Bajo",
+          type: "Secundaria",
+          levelReq: 8,
+          reward: "8,000 ₡ + Nanobots",
+          desc: "Recupera los microchips robados del almacén controlado por la banda cibernética 'Maelstrom'.",
+          status: "Disponible"
+        },
+        {
+          id: 3,
+          title: "Cita en Ciber-Odisea",
+          type: "Evento",
+          levelReq: 5,
+          reward: "Reputación +10%",
+          desc: "Reúnete con el informante 'Zero_Blade' en la zona VIP para obtener coordenadas exclusivas.",
+          status: "Disponible"
+        }
+      ]
+    };
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderQuests();
+      updateUIFromState();
+    });
+
+    // --- TAB NAVIGATION ---
+    function setActiveTab(tabId) {
+      const tabs = ['overview', 'character', 'map', 'inventory', 'multiplayer'];
+      tabs.forEach(t => {
+        const section = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tabId) {
+          section?.classList.remove('hidden');
+          btn?.classList.add('bg-slate-800', 'text-neon-blue', 'border', 'border-neon-blue/40');
+          btn?.classList.remove('text-slate-400');
+        } else {
+          section?.classList.add('hidden');
+          btn?.classList.remove('bg-slate-800', 'text-neon-blue', 'border', 'border-neon-blue/40');
+          btn?.classList.add('text-slate-400');
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // --- AUTH MODAL LOGIC ---
+    function switchAuthTab(type) {
+      const loginBtn = document.getElementById('tabLoginBtn');
+      const regBtn = document.getElementById('tabRegisterBtn');
+      const regFields = document.getElementById('registerFields');
+      const submitText = document.getElementById('authSubmitText');
+
+      if (type === 'login') {
+        loginBtn.className = "flex-1 py-2 font-semibold text-sm border-b-2 border-neon-blue text-neon-blue";
+        regBtn.className = "flex-1 py-2 font-semibold text-sm border-b-2 border-transparent text-slate-400";
+        regFields.classList.add('hidden');
+        submitText.innerText = "Iniciar Sesión";
+      } else {
+        regBtn.className = "flex-1 py-2 font-semibold text-sm border-b-2 border-neon-blue text-neon-blue";
+        loginBtn.className = "flex-1 py-2 font-semibold text-sm border-b-2 border-transparent text-slate-400";
+        regFields.classList.remove('hidden');
+        submitText.innerText = "Crear Cuenta de Agente";
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const regUsername = document.getElementById('regUsername').value;
+      if (regUsername.trim() !== '') {
+        gameState.player.name = regUsername;
+      }
+      updateUIFromState();
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    // --- CHARACTER CREATOR ---
+    function setAvatar(url) {
+      gameState.player.avatar = url;
+      document.getElementById('characterPreviewImg').src = url;
+      document.getElementById('headerAvatar').src = url;
+    }
+
+    function updateCharInfo() {
+      const name = document.getElementById('inputCharName').value;
+      if (name) {
+        gameState.player.name = name;
+        document.getElementById('charPreviewName').innerText = name;
+        document.getElementById('headerPlayerName').innerText = name;
+        document.getElementById('aiWelcomePlayer').innerText = name;
+      }
+    }
+
+    function updateCharClass() {
+      const c = document.getElementById('selectCharClass').value;
+      gameState.player.class = c;
+      document.getElementById('charPreviewClass').innerText = c;
+    }
+
+    function adjustStat(statKey, delta) {
+      if (delta > 0 && gameState.player.stats.points <= 0) return;
+      if (delta < 0 && gameState.player.stats[statKey] <= 1) return;
+
+      gameState.player.stats[statKey] += delta;
+      gameState.player.stats.points -= delta;
+
+      document.getElementById('statPoints').innerText = gameState.player.stats.points;
+      document.getElementById('statTechVal').innerText = gameState.player.stats.tech;
+      document.getElementById('statCombatVal').innerText = gameState.player.stats.combat;
+      document.getElementById('statAgilityVal').innerText = gameState.player.stats.agility;
+    }
+
+    function saveCharacter() {
+      alert("✅ Datos del operativo actualizados con éxito en el servidor de Nexus World.");
+    }
+
+    function updateUIFromState() {
+      document.getElementById('headerPlayerName').innerText = gameState.player.name;
+      document.getElementById('overviewLevel').innerText = gameState.player.level;
+      document.getElementById('overviewCredits').innerText = `${gameState.player.credits.toLocaleString()} ₡`;
+    }
+
+    // --- QUESTS LOG & MAP INTERACTION ---
+    function renderQuests() {
+      const listContainer = document.getElementById('questList');
+      listContainer.innerHTML = '';
+
+      gameState.quests.forEach(q => {
+        const isSelected = q.id === gameState.selectedQuestId;
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-lg border cursor-pointer transition-all ${
+          isSelected 
+            ? 'bg-slate-950/90 border-neon-blue shadow-neon-blue' 
+            : 'bg-slate-950/40 border-slate-800 hover:border-slate-700'
+        }`;
+        card.onclick = () => selectQuestMarker(q.id);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              q.type === 'Principal' ? 'bg-neon-blue/20 text-neon-blue' : 'bg-neon-purple/20 text-neon-purple'
+            }">${q.type}</span>
+            <span class="text-[10px] text-slate-400">Nvl Requerido: ${q.levelReq}</span>
+          </div>
+          <h4 class="font-bold text-white text-xs">${q.title}</h4>
+          <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${q.desc}</p>
+          <div class="mt-2 text-[10px] text-neon-green font-mono">Recompensa: ${q.reward}</div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function selectQuestMarker(questId) {
+      gameState.selectedQuestId = questId;
+      renderQuests();
+    }
+
+    function askAiAboutCurrentQuest() {
+      const quest = gameState.quests.find(q => q.id === gameState.selectedQuestId);
+      toggleAiModal();
+      if (quest) {
+        sendQuickAiQuery(`¿Cómo puedo completar con éxito la misión "${quest.title}"?`);
+      }
+    }
+
+    // --- AI ASSISTANT (GEMINI INTEGRATION) ---
+    function toggleAiModal() {
+      const modal = document.getElementById('aiModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function sendQuickAiQuery(text) {
+      document.getElementById('aiInput').value = text;
+      handleAiMessageSubmit(new Event('submit'));
+    }
+
+    async function handleAiMessageSubmit(e) {
+      e.preventDefault();
+      const inputEl = document.getElementById('aiInput');
+      const userText = inputEl.value.trim();
+      if (!userText) return;
+
+      // Render User Bubble
+      appendAiChatMessage('user', userText);
+      inputEl.value = '';
+
+      // Render Loading Bubble
+      const loadingId = appendAiChatMessage('ai', 'Procesando consulta táctica con Nexus AI...');
+
+      // Call Gemini API directly using non-streaming generateContent
+      try {
+        const systemPrompt = `Eres Nexus AI, el asistente virtual de inteligencia artificial integrado dentro del videojuego sci-fi "Nexus World". 
+        El jugador actual se llama "${gameState.player.name}", de clase "${gameState.player.class}", Nivel ${gameState.player.level}. 
+        Atributos del jugador: Tech: ${gameState.player.stats.tech}, Combat: ${gameState.player.stats.combat}, Agility: ${gameState.player.stats.agility}.
+        Misión activa seleccionada: Torre Arasaka (Hackeo de datos).
+        Responde siempre con un tono futurista, corporativo o hacker sci-fi, en idioma Español, ofreciendo consejos útiles sobre misiones, estrategia de personaje o historia del juego. Mantén tus respuestas concisas y claras (máximo 3 párrafos).`;
+
+        const apiKey = ""; // Canvas runtime automatically supplies the API key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: userText }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const aiResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error al conectar con la matriz de datos de Nexus AI.";
+
+        // Update Loading Bubble with Real Response
+        updateAiChatMessage(loadingId, aiResponseText);
+
+      } catch (err) {
+        updateAiChatMessage(loadingId, "⚠️ Conexión interrumpida con el núcleo de Nexus AI. Por favor reintenta.");
+      }
+    }
+
+    function appendAiChatMessage(role, text) {
+      const msgContainer = document.getElementById('aiMessages');
+      const msgId = 'msg-' + Date.now();
+
+      const wrapper = document.createElement('div');
+      wrapper.id = msgId;
+      wrapper.className = role === 'user' ? 'flex justify-end' : 'flex gap-3';
+
+      if (role === 'user') {
+        wrapper.innerHTML = `
+          <div class="bg-neon-purple/20 border border-neon-purple/50 p-3 rounded-lg text-xs text-white max-w-[85%] leading-relaxed">
+            ${escapeHtml(text)}
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <div class="w-7 h-7 rounded bg-neon-purple/20 border border-neon-purple shrink-0 flex items-center justify-center text-neon-purple text-xs font-bold">
+            AI
+          </div>
+          <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg text-xs text-slate-200 max-w-[85%] leading-relaxed msg-content">
+            ${escapeHtml(text)}
+          </div>
+        `;
+      }
+
+      msgContainer.appendChild(wrapper);
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+      return msgId;
+    }
+
+    function updateAiChatMessage(msgId, text) {
+      const el = document.getElementById(msgId);
+      if (el) {
+        const contentEl = el.querySelector('.msg-content');
+        if (contentEl) {
+          contentEl.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
+        }
+      }
+      const msgContainer = document.getElementById('aiMessages');
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
