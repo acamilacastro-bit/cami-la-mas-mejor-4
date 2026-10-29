@@ -1,0 +1,231 @@
+
+:root {
+  --background: #080b18;
+  --panel: #12182c;
+  --blue: #39d5ff;
+  --purple: #a66bff;
+  --text: #f2f5ff;
+  --muted: #aab4d0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at top, #20204c 0%, transparent 55%),
+    var(--background);
+  font-family: Arial, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 5%;
+  border-bottom: 1px solid #33385a;
+  background: #090d1bd9;
+}
+
+h1 {
+  margin: 0;
+  letter-spacing: 3px;
+  font-size: 23px;
+}
+
+h1 span {
+  color: var(--blue);
+}
+
+#playerInfo {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+main {
+  width: min(1200px, 94%);
+  margin: 36px auto;
+}
+
+.panel {
+  max-width: 650px;
+  margin: 60px auto;
+  padding: 40px;
+  text-align: center;
+  border: 1px solid #41416e;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #171b35, #0c1122);
+  box-shadow: 0 0 45px #6c43ff20;
+}
+
+.eyebrow {
+  color: var(--blue);
+  letter-spacing: 4px;
+  font-size: 12px;
+}
+
+.panel h2 {
+  font-size: clamp(28px, 5vw, 42px);
+}
+
+.panel > p:not(.eyebrow):not(.message) {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 13px 16px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #287bff, #8a45ff);
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.2);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+button.secondary {
+  border: 1px solid #424c76;
+  background: #1b2340;
+}
+
+.message {
+  color: var(--blue);
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.game-area,
+.card {
+  border: 1px solid #343c61;
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 16px;
+}
+
+.game-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.game-heading h2 {
+  margin-top: 0;
+}
+
+.status {
+  color: #6bffc2;
+  font-size: 11px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #3d4779;
+  border-radius: 8px;
+  background: #0b1020;
+}
+
+.help {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sidebar {
+  display: grid;
+  gap: 14px;
+}
+
+.card h3 {
+  margin-top: 0;
+  color: var(--blue);
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.chat-log {
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.chat-log strong {
+  color: var(--purple);
+}
+
+#chatForm {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+#chatForm input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  color: white;
+  background: #080d1c;
+  border: 1px solid #424c76;
+  border-radius: 6px;
+}
+
+#chatForm button {
+  width: auto;
+  margin: 0;
+}
+
+footer {
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 800px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .panel {
+    padding: 24px;
+    margin: 20px auto;
+  }
+}
