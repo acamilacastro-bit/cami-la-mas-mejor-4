@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus World</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>NEXUS <span>WORLD</span></h1>
+    <div id="playerInfo">Nivel 1 · 0 monedas</div>
+  </header>
+
+  <main>
+    <section id="menu" class="panel">
+      <p class="eyebrow">EL FUTURO TE ESPERA</p>
+      <h2>Explorá una nueva realidad</h2>
+      <p>Descubrí la ciudad, completá misiones y creá tu propia aventura.</p>
+
+      <button id="startBtn">Nueva partida</button>
+      <button id="continueBtn" class="secondary">Continuar partida</button>
+      <button id="profileBtn" class="secondary">Ver perfil</button>
+
+      <p id="menuMessage" class="message"></p>
+    </section>
+
+    <section id="game" hidden>
+      <div class="game-layout">
+        <div class="game-area">
+          <div class="game-heading">
+            <h2>Neo City</h2>
+            <span class="status">● ONLINE LOCAL</span>
+          </div>
+
+          <canvas id="world" width="800" height="500"
+            aria-label="Mundo de juego de Nexus World"></canvas>
+
+          <p class="help">
+            Mover: WASD o flechas · Recogé los cristales violetas.
+          </p>
+        </div>
+
+        <aside class="sidebar">
+          <div class="card">
+            <h3>Tu personaje</h3>
+            <p id="stats">Nivel 1</p>
+            <p id="xp">Experiencia: 0</p>
+            <p id="coins">Monedas: 0</p>
+          </div>
+
+          <div class="card">
+            <h3>📍 Misión actual</h3>
+            <p id="mission">Recolectá 5 cristales de energía.</p>
+            <p id="missionProgress">Cristales: 0/5</p>
+          </div>
+
+          <div class="card">
+            <h3>🤖 Nexus AI</h3>
+            <div id="chatLog" class="chat-log" aria-live="polite">
+              <p><strong>Nexus:</strong> ¡Hola, explorador! ¿En qué te ayudo?</p>
+            </div>
+            <form id="chatForm">
+              <input id="question" maxlength="200"
+                placeholder="Preguntá algo..." autocomplete="off"
+                aria-label="Pregunta para Nexus AI">
+              <button type="submit">Enviar</button>
+            </form>
+          </div>
+
+          <button id="saveBtn" class="secondary">Guardar partida</button>
+          <button id="homeBtn" class="secondary">Volver al menú</button>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Nexus World · Prototipo web en desarrollo
+  </footer>
+</body>
+</html>
